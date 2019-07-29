@@ -1,0 +1,74 @@
+---
+title: "Week 7"
+author: "Sandeep Joshi"
+date: "July 22, 2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r, message=FALSE,cache=FALSE}
+library("tidyverse")
+```
+
+## 3.2.4 Exercises
+1. Run ggplot(data = mpg). What do you see?
+```{r}
+ggplot(data = mpg)
+```
+This code creates an empty plot.
+
+
+2. How many rows are in mpg? How many columns?
+There are `r nrow(mtcars)` rows and `r ncol(mtcars)` columns.
+
+3. What does the drv variable describe? Read the help for ?mpg to find out.
+```{r}
+?mpg
+```
+drv variable is for drive. i.e. f = front-wheel drive, r = rear wheel drive, 4 = 4wd
+
+
+4. Make a scatterplot of hwy vs cyl.
+```{r}
+ggplot(mpg, aes(x = hwy, y = cyl)) + geom_point()
+```
+
+
+5. What happens if you make a scatterplot of class vs drv? Why is the plot not useful?
+```{r}
+ggplot(mpg, aes(x = class, y = drv)) + geom_point()
+```
+As we can see there are very few data points and these are two categorical datas. They do not have much correlations intutively as well. So we don't get any value out of plotting these.
+
+
+## 3.3.1 Exercises
+1. What’s gone wrong with this code? Why are the points not blue?
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+```
+
+```{r}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), colour = "blue")
+```
+This fixes it. We were giving color in aes hence it was gettting read as a variable with value blue and plotted as a point in legends in other words it was being used as a third dim say z for plot of x,y,z
+
+
+2. Which variables in mpg are categorical? Which variables are continuous? (Hint: type ?mpg to read the documentation for the dataset). How can you see this information when you run mpg?
+
+```{r}
+glimpse(mpg)
+```
+Categorical: model, trans, drv, fl, class
+Continuous: displ, year, cyl, cty, hwy
+
+
+3. Map a continuous variable to color, size, and shape. How do these aesthetics behave differently for categorical vs. continuous variables?
+
+4. What happens if you map the same variable to multiple aesthetics?
+
+5. What does the stroke aesthetic do? What shapes does it work with? (Hint: use ?geom_point)
+
+6. What happens if you map an aesthetic to something other than a variable name, like aes(colour = displ < 5)? Note, you’ll also need to specify x and y.
