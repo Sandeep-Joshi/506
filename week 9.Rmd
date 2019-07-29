@@ -6,7 +6,7 @@ output:
   pdf_document: default
 ---
 
-#The Base Plotting System
+## 7.1 The Base Plotting System
 ```{r}
 #install packages required
 install.packages("ggplot2")
@@ -17,42 +17,66 @@ with(airquality, plot(airquality$Temp, airquality$Ozone))
 lines(loess.smooth(airquality$Temp, airquality$Ozone))
 ```
 
-#Add title
 ```{r}
 data(cars)
+## Create the plot / draw canvas
 with(cars, plot(speed, dist))
+## Add annotation
 title("Speed vs. Stopping distance")
 ```
 
-#Lattice system
+## 7.2 The Lattice System
 ```{r}
-#relationship between life expectancy and income and how that relationship varies by region in the United States.
 library(lattice)
 state <- data.frame(state.x77, region = state.region)
 xyplot(Life.Exp ~ Income | region, data = state, layout = c(4, 1))
 ```
 
-# ggplot system
+## 7.3 The ggplot2 System
 ```{r}
 #gplot2 functions are similar to lattice, but the system is generally easier and more intuitive to use.
 library(ggplot2)
 data(mpg)
 qplot(displ, hwy, data = mpg)
 ```
-#Graphic Devices
 
+
+##8 Graphics Devices
+
+## 8.1 The Process of Making a Plot
 ```{r}
- library(datasets)
+library(datasets)
  
- ## Create plot on screen device
- with(faithful, plot(eruptions, waiting))  
+## Create plot on screen device
+with(faithful, plot(eruptions, waiting))  
  
- ## Add a main title
- title(main = "Old Faithful Geyser data")  
+## Annotate with a title
+title(main = "Old Faithful Geyser data")  
  
- ## Copy my plot to a PNG file
- dev.copy(png, file = "geyserplot.png")  
+## Open PDF device; create 'myplot.pdf' in my working directory
+pdf(file = "myplot.pdf")  
+
+## Create plot and send to a file (no plot appears on screen)
+with(faithful, plot(eruptions, waiting))  
+
+## Annotate plot; still nothing on screen
+title(main = "Old Faithful Geyser data")  
+
+## Close the PDF file device
+dev.off()  
+```
+## 8.5 Copying Plots
+## Copy my plot to a PNG file
+```{r}
+## Create plot on screen device
+with(faithful, plot(eruptions, waiting))  
+
+## Add a main title
+title(main = "Old Faithful Geyser data")  
+
+## Copy my plot to a PNG file
+dev.copy(png, file = "geyserplot.png")  
  
- ## Don't forget to close the PNG device!
- dev.off()  
+## Don't forget to close the PNG device!
+dev.off()  
 ```
