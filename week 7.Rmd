@@ -152,14 +152,17 @@ The nrow as well as ncol arguments are unnecessary for facet_grid since the numb
 
 
 6. When using facet_grid() you should usually put the variable with more unique levels in the columns. Why?
-
-
+We have more space horizontally i.e. x axis in generic display (hardware and settings). If we put variables iwth more unique levels in columns they will be plotted in x axis so there'll be more space to denote and label them out.
 
 
 
 
 ## 3.6.1 Exercises
 1. What geom would you use to draw a line chart? A boxplot? A histogram? An area chart?
+line chart: geom_line
+boxplot: geom_boxplot
+histogram: geom_histogram
+Area chart: geom_area
 
 2. Run this code in your head and predict what the output will look like. Then, run the code in R and check your predictions.
 ```{r}
@@ -167,11 +170,18 @@ ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
   geom_point() + 
   geom_smooth(se = FALSE)
 ```
+Prediction: This code produces a scatter plot with displ on x-axis and hwy on  y-axis, with different points colored by different categorical values for drv. These will be fitted via smooth line without standard errors.
+
+Conclusion: Ta-Da as predicted. 
 
 3. What does show.legend = FALSE do? What happens if you remove it?
+It hides the legend box. Nothing drastic happens but our readability of graph hampers. We may be not able to read what color denotes what line. Say in graph above we see colored line but we won't be able to tell which color correponds to which drv.
+
 Why do you think I used it earlier in the chapter?
+I think this usage refers to section 3.6 where we have three plots. We are only using aes color in last plot. Having legend there would have rescaled the plot and then we wouldn't find it as easy to visually compare the three plots.
 
 4. What does the se argument to geom_smooth() do?
+It adds standard error bands to the fit line.
 
 5. Will these two graphs look different? Why/why not?
 ```{r}
@@ -183,24 +193,137 @@ ggplot() +
   geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
   geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
 ```
+They will look same as we have exact same params for geom_point and geom_smooth in seconds as we had for ggplot in first. These arguments are carried over from ggplot and overridden in geom_point and geom_smooth. Since they have nothing, these end up being exactly same.
+
 6. Recreate the R code necessary to generate the following graphs.
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_smooth(mapping = aes(group = drv), se = FALSE) +
+  geom_point()
+
+ggplot(mpg, aes(x = displ, y = hwy, colour = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(colour = drv)) +
+  geom_smooth(se = FALSE)
+
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(aes(colour = drv)) +
+  geom_smooth(aes(linetype = drv), se = FALSE)
+
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(size = 5, color = "white") +
+  geom_point(aes(colour = drv))
+```
 
 
 
 
 ## 3.7.1 Exercises
 1. What is the default geom associated with stat_summary()? How could you rewrite the previous plot to use that geom function instead of the stat function?
+Default geom associated with stat_summary is geom_pointrange
+```{r}
+ggplot(data = diamonds) +
+  geom_pointrange(mapping = aes(x = cut, y = depth), stat = "summary")
+```
 
 2. What does geom_col() do? How is it different to geom_bar()?
+geom_col takes x and y data and sizes bars of x based on value of y. geom_bar just takes x and makes bar height based on counts of x for that value.
+Also, the default stat of geom_col is stat_identity whereas default stat of geom_bar is stat_bin.
+
 
 3. Most geoms and stats come in pairs that are almost always used in concert. Read through the documentation and make a list of all the pairs. What do they have in common?
+They have same trailing names post underscore in most of the cases(?). Refer: https://ggplot2.tidyverse.org/reference/#section-layer-stats, http://sape.inf.usi.ch/quick-reference/ggplot2/geom
 
 4. What variables does stat_smooth() compute? What parameters control its behaviour?
+```{r}
+?stat_smooth
+```
+
+Computed variables
+
+y: predicted value
+ymin: lower pointwise confidence interval around the mean
+ymax: upper pointwise confidence interval around the mean
+se: standard error
+
+Parameters which control its behaviour
+mapping, method, formula, etcß
+
 
 5. In our proportion bar chart, we need to set group = 1. Why? In other words what is the problem with these two graphs?
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+```
+
 ```{r}
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut, y = ..prop..))
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
 ```
+As seen when `group = 1` is not included, then all the bars in the plot have the same height, a height of 1. This is because geom_bar assumes that the groups are equal to the `x` values so each is its own group.
+
+## 3.8.1 Exercises
+1. What is the problem with this plot? How could you improve it?
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_point()
+```
+There's overplotting going on in here so to avoid this gridding we can use jitter 
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = cty, y = hwy), position = "jitter")
+```
+
+
+
+2. What parameters to geom_jitter() control the amount of jittering?
+*width* controls the amount of vertical displacement
+*height* controls the amount of horizontal displacement.
+
+3. Compare and contrast geom_jitter() with geom_count().
+geom_jitter adds noise to avoid overgridding and it changes the value of x and y slightly so it could be visually discernable and no overlapping occurs. 
+geom_count on the other hand increase the size of the plot-point based on all the plot points that coincide there.
+
+4. What’s the default position adjustment for geom_boxplot()? Create a visualisation of the mpg dataset that demonstrates it.
+The default position adjustment for geom_boxplot is position_dodge2 or just dodge2.
+```{r}
+ggplot(data = mpg, aes(x = drv, y = hwy, colour = class)) +
+  geom_boxplot()
+```
+
+
+## 3.9.1 Exercises
+1. Turn a stacked bar chart into a pie chart using coord_polar().
+```{r}
+ggplot(mpg, aes(x = factor(1), fill = drv)) + geom_bar(width = 1) + coord_polar(theta = "y")
+```
+2. What does labs() do? Read the documentation.
+```{r}
+?labs
+```
+labs is for labels.
+The labs function adds/ modifies axis titles, plot titles, and a caption to the plot.
+
+3. What’s the difference between coord_quickmap() and coord_map()?
+These both are used to project 3d earth to 2d plane. coord_quickmap is more approximate and error prone and is more viable for smaller areas which are close to equator as distoration in that area and scale is low. Compared to coord_map this is faster and less processing intense.
+
+
+4. What does the plot below tell you about the relationship between city and highway mpg? Why is coord_fixed() important? What does geom_abline() do?
+```{r}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() + 
+  geom_abline() +
+  coord_fixed()
+```
+The function coord_fixed ensures that the line produced by geom_abline is at a 45-degree angle.
+This adds a fixed reference line with slope 1 so we can visually compare the correlation.
+
