@@ -5,8 +5,7 @@ date: "July 22, 2019"
 output: pdf_document
 ---
 
-## Hierarchical clustering
-
+## Hierarchical Cluster Analysis
 ```{r}
 library(tidyverse)
 library(cluster) 
@@ -14,22 +13,30 @@ library(factoextra)
 library(dendextend)
 ```
 
+## Data Preparation
 ```{r}
 df <- USArrests
-# Scaling the data
+
+# Scaling the data. This is required as we don't want clustering Algos to depend on arbitrary variable units.
 df <- scale(df)
 head(df)
+
+# Agglomerative Hierarchical Clustering
 # Dissimilarity matrix
 d <- dist(df, method = "euclidean")
+
 # Hierarchical clustering using Complete Linkage
 hc1 <- hclust(d, method = "complete" )
-# Plot the obtained dendrogram
+
+# Plot the cluster dendrogram
 plot(hc1, cex = 0.6, hang = -1)
 ```
 
+# Alternatively using agglomerative coefficient
 ```{r}
 # Compute with agnes
 hc2 <- agnes(df, method = "complete")
+
 # Agglomerative coefficient
 hc2$ac
 ```
@@ -40,81 +47,105 @@ The agglomorative coefficient indicates a strong clustering structure
 # Methods to assess
 m <- c( "average", "single", "complete", "ward")
 names(m) <- c( "average", "single", "complete", "ward")
+
 # function to compute coefficient
 ac <- function(x) {
   agnes(df, method = x)$ac
 }
+
 map_dbl(m, ac)
+
+# Visualising the clustering
+hc3 <- agnes(df, method = "ward")
+pltree(hc3, cex = 0.6, hang = -1, main = "Dendrogram of agnes") 
 ```
 
-The above results indicate that Ward's method identifies the strongest clustering structure of the methods assessed.
+It shows that Ward's method identifies the strongest clustering structure of the methods assessed.
+
 
 ## Divisive hierarchical structuring
-
 ```{r}
 # Compute divisive hierarchical clustering
 hc4 <- diana(df)
+
 # Divise coefficient; amount of clustering structure found
 hc4$dc
-# plot dendrogram
+
+# Visualising the clustering
 pltree(hc4, cex = 0.6, hang = -1, main = "Dendrogram of diana")
 ```
 
 ## Working with Dendograms
-
 ```{r}
 # Ward's method
 hc5 <- hclust(d, method = "ward.D2" )
+
 # Cut tree into 4 groups
 sub_grp <- cutree(hc5, k = 4)
+
 # Number of members in each cluster
 table(sub_grp)
-#Drawing a border around each cluster
+
+# Adding clusters to rows
+USArrests %>%
+  mutate(cluster = sub_grp) %>%
+  head
+
+# Drawing a border around each cluster for dendrograms
 plot(hc5, cex = 0.6)
 rect.hclust(hc5, k = 4, border = 2:5)
-#Visualizing in scatterplot
+
+# Visualizing in scatterplot
 fviz_cluster(list(data = df, cluster = sub_grp))
+
 # Cut agnes() tree into 4 groups
 hc_a <- agnes(df, method = "ward")
 cutree(as.hclust(hc_a), k = 4)
+
 # Cut diana() tree into 4 groups
 hc_d <- diana(df)
 cutree(as.hclust(hc_d), k = 4)
 ```
 
+## Comparing hierarchical clustering with complete linkage vs Ward's
 ```{r}
-#Comparing hierarchical clustering with complete linkage and Ward's
 # Compute distance matrix
 res.dist <- dist(df, method = "euclidean")
+
 # Compute 2 hierarchical clusterings
 hc1 <- hclust(res.dist, method = "complete")
 hc2 <- hclust(res.dist, method = "ward.D2")
+
 # Create two dendrograms
 dend1 <- as.dendrogram (hc1)
 dend2 <- as.dendrogram (hc2)
+
+# Tanglegram for dendrograms comparision
 tanglegram(dend1, dend2)
+
+# Customizing dendrogram above
+dend_list <- dendlist(dend1, dend2)
+
+tanglegram(dend1, dend2,
+  highlight_distinct_edges = FALSE, # Turn-off dashed lines
+  common_subtrees_color_lines = FALSE, # Turn-off line colors
+  common_subtrees_color_branches = TRUE, # Color common branches 
+  main = paste("entanglement =", round(entanglement(dend_list), 2))
+  )
 ```
 
 
-## Determining Optimal Clusters
-
+## Determining Optimal Clusters via different
 ```{r}
-#Elbow method
+# Elbow method
 fviz_nbclust(df, FUN = hcut, method = "wss")
-#Average Silhouette method
+
+# Average Silhouette method
 fviz_nbclust(df, FUN = hcut, method = "silhouette")
-```
+# Optimal number of clusters is 2
 
-Optimal number of clusters is 2
-
-```{r}
 # Gap Statistic method
 gap_stat <- clusGap(df, FUN = hcut, nstart = 25, K.max = 10, B = 50)
 fviz_gap_stat(gap_stat)
-```
-
-Optimal number of clusters is 3
-
-
-
+# Optimal number of clusters is 3
 ```
