@@ -66,9 +66,141 @@ Continuous: displ, year, cyl, cty, hwy
 
 
 3. Map a continuous variable to color, size, and shape. How do these aesthetics behave differently for categorical vs. continuous variables?
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, colour = cty, size = cty)) + geom_point()
+ggplot(mpg, aes(x = displ, y = hwy, colour = fl, size = fl)) + geom_point()
+```
+As we can see from two plots if we use continuous variable we get same color with different shades/ intesity but when we use categorical data we get different colors for different values as there's no logical relation of shade/intensity or size with different values so we end up showing different colors or shapes. 
+
 
 4. What happens if you map the same variable to multiple aesthetics?
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, colour = hwy, size = hwy)) + geom_point()
+```
+
+There's not much value in denoting same data using two or more means. It might hamper readability and might lead to confusion.
 
 5. What does the stroke aesthetic do? What shapes does it work with? (Hint: use ?geom_point)
+```{r}
+?geom_point
+# For shapes that have a border (like 21), you can colour the inside and
+# outside separately. Use the stroke aesthetic to modify the width of the
+# border
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(shape = 21, colour = "black", fill = "white", size = 5, stroke = 5)
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(shape = 22, colour = "black", fill = "white", size = 5, stroke = 10)
+```
+stroke changes the brush stroke used to make border of the shapes. It only works with shapes with borders e.g 21, 22 etc
+
 
 6. What happens if you map an aesthetic to something other than a variable name, like aes(colour = displ < 5)? Note, you’ll also need to specify x and y.
+```{r}
+ggplot(mpg, aes(x = displ, y = hwy, colour = displ < 5)) + geom_point()
+```
+We can see based on displ being greater than or less than 5 we have values TRUE or FALSE for color and R uses different colors to show these states.
+
+
+## 3.5.1 Exercises
+1. What happens if you facet on a continuous variable?
+Things get messy. The continuous variable is converted to a categorical variable and R plots a facet for each distinct value.
+
+2. What do the empty cells in plot with facet_grid(drv ~ cyl) mean? How do they relate to this plot?
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl))
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = drv, y = cyl)) +
+  facet_grid(drv ~ cyl)
+```
+Empty cell means that there are no values for this combination of drv and cyl.
+
+3. What plots does the following code make? What does . do?
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+The symbol `.` ignores that dimension when faceting. We can see in both graphs only faceting is done only on one dimension.
+ 
+4. Take the first faceted plot in this section:
+```{r}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+What are the advantages to using faceting instead of the colour aesthetic? What are the disadvantages? How might the balance change if you had a larger dataset?
+Advantages of faceting over colour is that former is more readable in plots as less manglinging due to large datapoints or overlaps are there. Hard to discern between certains colors specially if you have color-blindness.
+
+Disadvantages would be scaling down of graph due to multiple plots. Overlaying of plots makes comparisions easier.
+
+
+5. Read ?facet_wrap. What does nrow do? What does ncol do? What other options control the layout of the individual panels? Why doesn’t facet_grid() have nrow and ncol arguments?
+```{r}
+?facet_wrap
+```
+The arguments nrow determines the number of rows to use when using the facets.
+It is necessary since facet_wrap() only facets on one variable.
+
+The nrow as well as ncol arguments are unnecessary for facet_grid since the number of unique values of the variables specified in the function determines the number of rows and columns.
+
+
+
+6. When using facet_grid() you should usually put the variable with more unique levels in the columns. Why?
+
+
+
+
+
+
+## 3.6.1 Exercises
+1. What geom would you use to draw a line chart? A boxplot? A histogram? An area chart?
+
+2. Run this code in your head and predict what the output will look like. Then, run the code in R and check your predictions.
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+
+3. What does show.legend = FALSE do? What happens if you remove it?
+Why do you think I used it earlier in the chapter?
+
+4. What does the se argument to geom_smooth() do?
+
+5. Will these two graphs look different? Why/why not?
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+6. Recreate the R code necessary to generate the following graphs.
+
+
+
+
+## 3.7.1 Exercises
+1. What is the default geom associated with stat_summary()? How could you rewrite the previous plot to use that geom function instead of the stat function?
+
+2. What does geom_col() do? How is it different to geom_bar()?
+
+3. Most geoms and stats come in pairs that are almost always used in concert. Read through the documentation and make a list of all the pairs. What do they have in common?
+
+4. What variables does stat_smooth() compute? What parameters control its behaviour?
+
+5. In our proportion bar chart, we need to set group = 1. Why? In other words what is the problem with these two graphs?
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
+```

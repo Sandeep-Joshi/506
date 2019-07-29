@@ -1,0 +1,58 @@
+---
+title: "Plotting systems and Graphic Devices"
+author: "Sandeep Joshi"
+date: "July 22, 2019"
+output:
+  pdf_document: default
+---
+
+#The Base Plotting System
+```{r}
+#install packages required
+install.packages("ggplot2")
+install.packages("lattice")
+#Scatterplot with loess curve
+data(airquality)
+with(airquality, plot(airquality$Temp, airquality$Ozone))
+lines(loess.smooth(airquality$Temp, airquality$Ozone))
+```
+
+#Add title
+```{r}
+data(cars)
+with(cars, plot(speed, dist))
+title("Speed vs. Stopping distance")
+```
+
+#Lattice system
+```{r}
+#relationship between life expectancy and income and how that relationship varies by region in the United States.
+library(lattice)
+state <- data.frame(state.x77, region = state.region)
+xyplot(Life.Exp ~ Income | region, data = state, layout = c(4, 1))
+```
+
+# ggplot system
+```{r}
+#gplot2 functions are similar to lattice, but the system is generally easier and more intuitive to use.
+library(ggplot2)
+data(mpg)
+qplot(displ, hwy, data = mpg)
+```
+#Graphic Devices
+
+```{r}
+ library(datasets)
+ 
+ ## Create plot on screen device
+ with(faithful, plot(eruptions, waiting))  
+ 
+ ## Add a main title
+ title(main = "Old Faithful Geyser data")  
+ 
+ ## Copy my plot to a PNG file
+ dev.copy(png, file = "geyserplot.png")  
+ 
+ ## Don't forget to close the PNG device!
+ dev.off()  
+```
